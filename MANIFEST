@@ -1,0 +1,12 @@
+CHANGES
+LICENSE
+MANIFEST
+META.yml
+Makefile.PL
+README
+cpanfile
+lib/XML/Struct.pm
+lib/XML/Struct/Reader.pm
+lib/XML/Struct/Writer.pm
+t/reader.t
+t/writer.t

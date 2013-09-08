@@ -1,0 +1,9 @@
+Changelog for XML-Struct
+
+0.02 2013-09-08T09:22:43
+ - renamed to XML::Struct [Jakob Voss]
+ - added writer [Jakob Voss]
+
+0.01 2013-09-06T22:50:43
+ - initial draft [Jakob Voss]
+
