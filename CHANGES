@@ -1,6 +1,14 @@
 Changelog for XML-Struct
 
-0.02 2013-09-08T09:22:43
+0.03 2013-09-09T08:34:01
+ - added function hashifyXML [Jakob Voss]
+ - extended writer [Jakob Voss]
+ - fix reader test [Jakob Voss]
+ - implemented writer [Jakob Voss]
+ - don't test on Perl 5.8 with travis [Jakob Voss]
+ - first draft of writer [Jakob Voss]
+
+0.02 2013-09-08T09:19:25
  - renamed to XML::Struct [Jakob Voss]
  - added writer [Jakob Voss]
 

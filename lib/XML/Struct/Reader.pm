@@ -1,6 +1,6 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read ordered XML from a stream
-our $VERSION = '0.02'; # VERSION
+our $VERSION = '0.03'; # VERSION
 
 use strict;
 use Moo;
@@ -32,7 +32,7 @@ sub readElement {
         my $attr = $self->readAttributes($stream);
         my $children = $self->readContent($stream) if !$stream->isEmptyElement;
         if ($children) {
-            push @element, $attr ||  { }, $children;
+            push @element, $attr || { }, $children;
         } elsif( $attr ) {
             push @element, $attr;
         }
@@ -47,10 +47,10 @@ sub readElement {
 sub readNext {
     my ($self, $stream, $path) = @_;
 
-    # TODO: normalize Path
-    $path = "./$path" if $path !~ qr{^[./]}; # TODO: support ../
+    $path = "./$path" if $path !~ qr{^[./]};
     $path .= '*' if $path =~ qr{/$};
 
+    # TODO: check and normalize Path
     # print "path='$path'";
 
     my @parts = split '/', $path;
@@ -63,11 +63,10 @@ sub readNext {
         return if !$stream->read; # error
         # printf "%d %s\n", ($stream->depth, $stream->nodePath) if $stream->nodeType == 1;
     } while( 
-        $stream->nodeType != XML_READER_TYPE_ELEMENT || $stream->depth != $depth || 
+        $stream->nodeType != XML_READER_TYPE_ELEMENT or $stream->depth != $depth or 
         ($name ne '*' and $stream->name ne $name)
         # TODO: check full $stream->nodePath and possibly skip subtrees
         );
-
 
     $self->readElement($stream);
 }
@@ -101,7 +100,7 @@ sub readContent {
 
         if ($type == XML_READER_TYPE_ELEMENT) {
             push @children, $self->readElement($stream);
-        } elsif ($type == XML_READER_TYPE_TEXT || $type == XML_READER_TYPE_CDATA ) {
+        } elsif ($type == XML_READER_TYPE_TEXT or $type == XML_READER_TYPE_CDATA ) {
             push @children, $stream->value;
         } elsif ($type == XML_READER_TYPE_SIGNIFICANT_WHITESPACE && $self->whitespace) {
             push @children, $stream->value;
@@ -121,17 +120,13 @@ XML::Struct::Reader - Read ordered XML from a stream
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
     my $stream = XML::LibXML::Reader->new( location => "file.xml" );
     my $stream = XML::Struct::Reader->new;
     my $data = $stream->read( $stream );
-
-    # while 
-    # depth < 
-#    $transform = XML::Struct::Reader->new;
 
 =head1 DESCRIPTION
 
@@ -160,11 +155,18 @@ might happed.
 
 =head2 readNext( $stream, $path )
 
+Read the next element from a stream. The experimental option C<$path> can be
+used to specify an element name (the empty string or "C<*>" match all element
+nodes) and a path, such as C</some/element>. The path operator "C<../>" is not
+supported.
+
 =head2 readContent( $stream )
 
 Read all child elements of an XML element and return the result as array
 reference or as empty list if no children were found.  Significant whitespace
 is only included if option C<whitespace> is enabled.
+
+=endocing utf8
 
 =head readAttributes( $stream )
 
