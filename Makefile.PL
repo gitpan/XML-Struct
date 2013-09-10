@@ -9,7 +9,7 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "Convert document-oriented XML to data structures, preserving element order",
+  "ABSTRACT" => "Represent XML as data structure preserving element order",
   "AUTHOR" => "Jakob Vo\303\237",
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
@@ -20,10 +20,11 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "XML::Struct",
   "PREREQ_PM" => {
+    "Moo" => "1.0",
     "XML::LibXML" => "2.0"
   },
   "TEST_REQUIRES" => {},
-  "VERSION" => "0.03",
+  "VERSION" => "0.04",
   "test" => {
     "TESTS" => "t/*.t"
   }

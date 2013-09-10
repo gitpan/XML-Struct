@@ -9,5 +9,7 @@ lib/XML/Struct.pm
 lib/XML/Struct/Reader.pm
 lib/XML/Struct/Writer.pm
 t/functions.t
+t/nested.xml
+t/reader-path.t
 t/reader.t
 t/writer.t

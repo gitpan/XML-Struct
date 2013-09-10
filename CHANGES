@@ -1,6 +1,10 @@
 Changelog for XML-Struct
 
-0.03 2013-09-09T08:34:01
+0.04 2013-09-10T11:52:13
+ - improved path matching [Jakob Voss]
+ - support hashify root aka KeepRoot [Jakob Voss]
+
+0.03 2013-09-09T08:32:40
  - added function hashifyXML [Jakob Voss]
  - extended writer [Jakob Voss]
  - fix reader test [Jakob Voss]

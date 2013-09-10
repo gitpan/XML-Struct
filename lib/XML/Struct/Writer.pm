@@ -1,6 +1,6 @@
 package XML::Struct::Writer;
 # ABSTRACT: Process ordered XML as stream, for instance to write XML
-our $VERSION = '0.03'; # VERSION
+our $VERSION = '0.04'; # VERSION
 
 use strict;
 use Moo;
@@ -102,7 +102,7 @@ XML::Struct::Writer - Process ordered XML as stream, for instance to write XML
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 

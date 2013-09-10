@@ -1,9 +1,9 @@
 
 
 This archive contains the distribution XML-Struct,
-version 0.03:
+version 0.04:
 
-  Convert document-oriented XML to data structures, preserving element order
+  Represent XML as data structure preserving element order
 
 This software is copyright (c) 2013 by Jakob Voß.
 

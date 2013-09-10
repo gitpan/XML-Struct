@@ -1,12 +1,20 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read ordered XML from a stream
-our $VERSION = '0.03'; # VERSION
+our $VERSION = '0.04'; # VERSION
 
 use strict;
 use Moo;
+use Carp qw(croak);
+use Scalar::Util qw(blessed);
 
 has whitespace => (is => 'rw', default => sub { 0 });
 has attributes => (is => 'rw', default => sub { 1 });
+has path       => (is => 'rw', default => sub { '*' }, isa => \&_checkPath);
+has stream     => (is => 'rw'); # TODO: check with isa
+has from       => (is => 'rw', trigger => 1);
+
+has hashify    => (is => 'rw', default => sub { 0 });
+has root       => (is => 'rw', default => sub { 0 });
 
 use XML::LibXML::Reader qw(
     XML_READER_TYPE_ELEMENT
@@ -17,14 +25,93 @@ use XML::LibXML::Reader qw(
 ); 
 
 
-sub read {
-    my ($self, $stream) = @_;
-    $self->readNext( $stream, '' );
+sub _trigger_from {
+    my ($self, $from) = @_;
+
+    unless (blessed $from and $from->isa('XML::LibXML::Reader')) {
+        my %options; 
+
+        if (ref $from and ref $from eq 'HASH') {
+            %options = %$from;
+            $from = delete $options{from} if exists $options{from};
+        }
+
+        if (!defined $from or $from eq '-') {
+            $options{IO} = \*STDIN
+        } elsif( !ref $from and $from =~ /^</ ) {
+            $options{string} = $from;
+        } elsif( ref $from and ref $from eq 'SCALAR' ) {
+            $options{string} = $$from;
+        } elsif( ref $from and ref $from eq 'GLOB' ) {
+            $options{FD} = $from;
+        } elsif( blessed $from ) {
+            $options{IO} = $from;
+        } elsif( !ref $from ) {
+            $options{location} = $from; # filename or URL
+        } elsif( ! grep { $_ =~ /^(IO|string|location|FD|DOM)$/} keys %options ) {
+            croak "invalid option 'from': $from";
+        }
+        
+        $from = XML::LibXML::Reader->new( %options );
+    }
+
+    $self->stream( $from );
 }
 
 
+
+sub _checkPath {
+    my $path = shift;
+    die "invalid path: $path" if $path =~ qr{\.\.|//|^\.};
+    die "relative path not supported: $path" if $path =~ qr{^[^/]+/};
+    return $path;
+}
+
+sub _nameMatch {
+   return ($_[0] eq '*' or $_[0] eq $_[1]); 
+}
+
+sub readNext { # TODO: use XML::LibXML::Reader->nextPatternMatch for more performance
+    my $self   = shift;
+    my $stream = blessed $_[0] ? shift() : $self->stream;
+    my $path   = defined $_[0] ? _checkPath($_[0]) : $self->path;
+
+    $path .= '*' if $path =~ qr{/$};
+
+    my @parts = split '/', $path;
+    my $relative = $parts[0] ne '';
+
+    while(1) { 
+        return if !$stream->read; # end or error
+        next if $stream->nodeType != XML_READER_TYPE_ELEMENT;
+
+        printf " %d=%d %s:%s==%s\n", $stream->depth, scalar @parts, $stream->nodePath, $stream->name, join('/', @parts);
+
+        if ($relative) {
+            if (_nameMatch($parts[0], $stream->name)) {
+                last;
+            }
+        } else {
+            if (!_nameMatch($parts[$stream->depth+1], $stream->name)) {
+                $stream->nextSibling();
+            } elsif ($stream->depth == scalar @parts - 2) {
+                last;
+            }
+        }
+    } 
+
+    my $xml = $self->readElement($stream);
+    return $self->hashify 
+        ? XML::Struct::hashifyXML( $xml, root => $self->root ) 
+        : $xml;
+}
+
+*read = \&readNext;
+
+
 sub readElement {
-    my ($self, $stream) = @_;
+    my $self   = shift;
+    my $stream = @_ ? shift : $self->stream;
 
     my @element = ($stream->name);
 
@@ -44,36 +131,10 @@ sub readElement {
 }
 
 
-sub readNext {
-    my ($self, $stream, $path) = @_;
-
-    $path = "./$path" if $path !~ qr{^[./]};
-    $path .= '*' if $path =~ qr{/$};
-
-    # TODO: check and normalize Path
-    # print "path='$path'";
-
-    my @parts = split '/', $path;
-    my $depth = scalar @parts - 2;
-    $depth += $stream->depth if $parts[0] eq '.'; # relative path
-
-    my $name = $parts[-1];
-
-    do { 
-        return if !$stream->read; # error
-        # printf "%d %s\n", ($stream->depth, $stream->nodePath) if $stream->nodeType == 1;
-    } while( 
-        $stream->nodeType != XML_READER_TYPE_ELEMENT or $stream->depth != $depth or 
-        ($name ne '*' and $stream->name ne $name)
-        # TODO: check full $stream->nodePath and possibly skip subtrees
-        );
-
-    $self->readElement($stream);
-}
-
-
 sub readAttributes {
-    my ($self, $stream) = @_;
+    my $self   = shift;
+    my $stream = @_ ? shift : $self->stream;
+
     return unless $stream->moveToFirstAttribute == 1;
 
     my $attr = { };
@@ -87,7 +148,8 @@ sub readAttributes {
 
 
 sub readContent {
-    my ($self, $stream) = @_;
+    my $self   = shift;
+    my $stream = @_ ? shift : $self->stream;
 
     my @children;
     while(1) {
@@ -120,13 +182,12 @@ XML::Struct::Reader - Read ordered XML from a stream
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
-    my $stream = XML::LibXML::Reader->new( location => "file.xml" );
-    my $stream = XML::Struct::Reader->new;
-    my $data = $stream->read( $stream );
+    my $reader = XML::Struct::Reader->new( from => "file.xml" );
+    my $data   = $reader->read;
 
 =head1 DESCRIPTION
 
@@ -135,43 +196,71 @@ Perl data structure with ordered XML (see L<XML::Struct>).
 
 =head1 METHODS
 
-=head2 new( %options )
+=head2 read = readNext ( $stream [, $path ] )
 
-Create a new reader. By default whitespace is ignored, unless enabled with
-option C<whitespace>. The option C<attributes> can be set to false to omit
-all attributes from the result.
+Read the next XML element from a stream. If no path option is specified, the
+reader's path option is used ("C<*>" by default, first matching the root, then
+every other element). 
 
-=head2 read( $stream )
-
-Read the root element or the next element element. This method is a shortcut
-for C<< readNext( $stream, '*' ) >>.
-
-=head2 readElement( $stream )
+=head2 readElement( [ $stream ] )
 
 Read an XML element from a stream and return it as array reference with element name,
 attributes, and child elements. In contrast to method C<read>, this method expects
 the stream to be at an element node (C<< $stream->nodeType == 1 >>) or bad things
 might happed.
 
-=head2 readNext( $stream, $path )
+=head2 readAttributes( [ $stream ] )
 
-Read the next element from a stream. The experimental option C<$path> can be
-used to specify an element name (the empty string or "C<*>" match all element
-nodes) and a path, such as C</some/element>. The path operator "C<../>" is not
-supported.
+Read all XML attributes from a stream and return a hash reference or an empty
+list if no attributes were found.
 
-=head2 readContent( $stream )
+=head2 readContent( [ $stream ] )
 
 Read all child elements of an XML element and return the result as array
 reference or as empty list if no children were found.  Significant whitespace
 is only included if option C<whitespace> is enabled.
 
-=endocing utf8
+=encoding utf8
 
-=head readAttributes( $stream )
+=head1 CONFIGURATION
 
-Read all XML attributes from a stream and return a hash reference or an empty
-list if no attributes were found.
+=over 4
+
+=item C<from>
+
+A source to read from. Possible values include a string or string reference
+with XML data, a filename, an URL, a file handle, and a hash reference with
+options passed to L<XML::LibXML::Reader>.
+
+=item C<stream>
+
+A L<XML::LibXML::Reader> to read from. If no stream has been defined, one must
+pass a stream parameter to the C<read*> methods. Setting a source with option
+C<from> automatically sets a stream.
+
+=item C<attributes>
+
+Include attributes (enabled by default). If disabled, the representation of
+an XML element will be
+
+   [ $name => \@children ]
+
+instead of
+
+   [ $name => \%attributes, \@children ]
+
+=item C<path>
+
+Optional path expression to be used as default value when calling C<read>.
+Pathes must either be absolute (starting with "C</>") or consist of a single
+element name. The special name "C<*>" matches all element names.
+
+A path is a very reduced form of an XPath expressions (no axes, no "C<..>" or
+C<//>, no node tests...). Namespaces are not supported yet.
+
+=item C<whitespace>
+
+Include ignorable whitespace as text elements (disabled by default)
 
 =head1 AUTHOR
 
