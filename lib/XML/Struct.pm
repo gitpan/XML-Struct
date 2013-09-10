@@ -1,6 +1,6 @@
 package XML::Struct;
 # ABSTRACT: Represent XML as data structure preserving element order
-our $VERSION = '0.04'; # VERSION
+our $VERSION = '0.05'; # VERSION
 
 use strict;
 use XML::LibXML::Reader;
@@ -103,7 +103,6 @@ sub textValues {
 1;
 
 __END__
-
 =pod
 
 =head1 NAME
@@ -112,7 +111,7 @@ XML::Struct - Represent XML as data structure preserving element order
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -215,3 +214,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+

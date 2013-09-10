@@ -1,6 +1,6 @@
 package XML::Struct::Writer;
 # ABSTRACT: Process ordered XML as stream, for instance to write XML
-our $VERSION = '0.04'; # VERSION
+our $VERSION = '0.05'; # VERSION
 
 use strict;
 use Moo;
@@ -93,7 +93,6 @@ sub writeEnd {
 1;
 
 __END__
-
 =pod
 
 =head1 NAME
@@ -102,7 +101,7 @@ XML::Struct::Writer - Process ordered XML as stream, for instance to write XML
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -231,3 +230,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+

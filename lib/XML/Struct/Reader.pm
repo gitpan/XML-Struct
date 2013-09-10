@@ -1,6 +1,6 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read ordered XML from a stream
-our $VERSION = '0.04'; # VERSION
+our $VERSION = '0.05'; # VERSION
 
 use strict;
 use Moo;
@@ -85,7 +85,7 @@ sub readNext { # TODO: use XML::LibXML::Reader->nextPatternMatch for more perfor
         return if !$stream->read; # end or error
         next if $stream->nodeType != XML_READER_TYPE_ELEMENT;
 
-        printf " %d=%d %s:%s==%s\n", $stream->depth, scalar @parts, $stream->nodePath, $stream->name, join('/', @parts);
+        # printf " %d=%d %s:%s==%s\n", $stream->depth, scalar @parts, $stream->nodePath, $stream->name, join('/', @parts);
 
         if ($relative) {
             if (_nameMatch($parts[0], $stream->name)) {
@@ -173,7 +173,6 @@ sub readContent {
 1;
 
 __END__
-
 =pod
 
 =head1 NAME
@@ -182,7 +181,7 @@ XML::Struct::Reader - Read ordered XML from a stream
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -274,3 +273,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+

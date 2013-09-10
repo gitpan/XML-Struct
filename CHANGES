@@ -1,6 +1,9 @@
 Changelog for XML-Struct
 
-0.04 2013-09-10T11:52:13
+0.05 2013-09-10T12:09:59
+ - removed test artifact [Jakob Voss]
+
+0.04 2013-09-10T11:50:06
  - improved path matching [Jakob Voss]
  - support hashify root aka KeepRoot [Jakob Voss]
 
