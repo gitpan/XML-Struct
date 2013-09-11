@@ -1,6 +1,12 @@
 Changelog for XML-Struct
 
-0.05 2013-09-10T12:09:59
+0.06 2013-09-11T10:31:18
+ - bumped version [Jakob Voss]
+ - added method readDocument [Jakob Voss]
+ - fixed hashification with root [Jakob Voss]
+ - improved writer with options 'encoding' and 'version' [Jakob Voss]
+
+0.05 2013-09-10T12:09:48
  - removed test artifact [Jakob Voss]
 
 0.04 2013-09-10T11:50:06

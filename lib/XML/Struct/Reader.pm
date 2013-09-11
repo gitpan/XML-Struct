@@ -1,11 +1,12 @@
 package XML::Struct::Reader;
-# ABSTRACT: Read ordered XML from a stream
-our $VERSION = '0.05'; # VERSION
+# ABSTRACT: Read XML stream into XML data structures
+our $VERSION = '0.06'; # VERSION
 
 use strict;
 use Moo;
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
+use XML::Struct;
 
 has whitespace => (is => 'rw', default => sub { 0 });
 has attributes => (is => 'rw', default => sub { 1 });
@@ -59,7 +60,6 @@ sub _trigger_from {
 }
 
 
-
 sub _checkPath {
     my $path = shift;
     die "invalid path: $path" if $path =~ qr{\.\.|//|^\.};
@@ -85,7 +85,7 @@ sub readNext { # TODO: use XML::LibXML::Reader->nextPatternMatch for more perfor
         return if !$stream->read; # end or error
         next if $stream->nodeType != XML_READER_TYPE_ELEMENT;
 
-        # printf " %d=%d %s:%s==%s\n", $stream->depth, scalar @parts, $stream->nodePath, $stream->name, join('/', @parts);
+#        printf " %d=%d %s:%s==%s\n", $stream->depth, scalar @parts, $stream->nodePath, $stream->name, join('/', @parts);
 
         if ($relative) {
             if (_nameMatch($parts[0], $stream->name)) {
@@ -102,11 +102,23 @@ sub readNext { # TODO: use XML::LibXML::Reader->nextPatternMatch for more perfor
 
     my $xml = $self->readElement($stream);
     return $self->hashify 
-        ? XML::Struct::hashifyXML( $xml, root => $self->root ) 
+        ? XML::Struct::hashifyXML( $xml, root => $self->root, attributes => $self->attributes ) 
         : $xml;
 }
 
 *read = \&readNext;
+
+
+sub readDocument {
+    my $self = shift;
+    my @document;
+   
+    while(my $element = $self->read(@_)) {
+        push @document, $element;
+    }
+
+    return wantarray ? @document : $document[0];
+}
 
 
 sub readElement {
@@ -177,11 +189,11 @@ __END__
 
 =head1 NAME
 
-XML::Struct::Reader - Read ordered XML from a stream
+XML::Struct::Reader - Read XML stream into XML data structures
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -195,11 +207,19 @@ Perl data structure with ordered XML (see L<XML::Struct>).
 
 =head1 METHODS
 
-=head2 read = readNext ( $stream [, $path ] )
+=head2 read = readNext ( [ $stream ] [, $path ] )
 
 Read the next XML element from a stream. If no path option is specified, the
 reader's path option is used ("C<*>" by default, first matching the root, then
 every other element). 
+
+=head2 readDocument( [ $stream ] [, $path ] )
+
+Read an entire XML document. In contrast to C<read>/C<readNext>, this method
+always reads the entire stream. The return value is the first element (that is
+the root element by default) in scalar context and a list of elements in array
+context. Multiple elements can be returned for instance when a path was
+specified to select document fragments.
 
 =head2 readElement( [ $stream ] )
 
