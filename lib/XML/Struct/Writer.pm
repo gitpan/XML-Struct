@@ -1,6 +1,6 @@
 package XML::Struct::Writer;
 # ABSTRACT: Write XML data structures as XML stream
-our $VERSION = '0.06'; # VERSION
+our $VERSION = '0.10'; # VERSION
 
 use strict;
 use Moo;
@@ -46,7 +46,7 @@ sub writeElement {
                 if (ref $child) {
                     $self->writeElement($child);
                 } else {
-                    $self->handler->characters({ Data => $child });
+                    $self->writeCharacters($child);
                 }
             }
         }
@@ -106,7 +106,7 @@ XML::Struct::Writer - Write XML data structures as XML stream
 
 =head1 VERSION
 
-version 0.06
+version 0.10
 
 =head1 SYNOPSIS
 

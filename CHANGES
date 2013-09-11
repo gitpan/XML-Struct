@@ -1,6 +1,9 @@
 Changelog for XML-Struct
 
-0.06 2013-09-11T10:31:18
+0.10 2013-09-11T12:05:06
+ - renamed 'hashify' to 'simple' [Jakob Voss]
+
+0.06 2013-09-11T10:31:11
  - bumped version [Jakob Voss]
  - added method readDocument [Jakob Voss]
  - fixed hashification with root [Jakob Voss]

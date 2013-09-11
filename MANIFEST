@@ -13,4 +13,5 @@ t/functions.t
 t/nested.xml
 t/reader-path.t
 t/reader.t
+t/synopsis.t
 t/writer.t
