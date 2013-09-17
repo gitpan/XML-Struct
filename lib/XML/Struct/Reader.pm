@@ -1,6 +1,6 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.12'; # VERSION
+our $VERSION = '0.13'; # VERSION
 
 use strict;
 use Moo;
@@ -13,6 +13,7 @@ has attributes => (is => 'rw', default => sub { 1 });
 has path       => (is => 'rw', default => sub { '*' }, isa => \&_checkPath);
 has stream     => (is => 'rw'); # TODO: check with isa
 has from       => (is => 'rw', trigger => 1);
+has ns         => (is => 'rw', default => sub { '' });
 
 has simple     => (is => 'rw', default => sub { 0 });
 has root       => (is => 'rw', default => sub { 0 });
@@ -89,13 +90,15 @@ sub readNext { # TODO: use XML::LibXML::Reader->nextPatternMatch for more perfor
         next if $stream->nodeType != XML_READER_TYPE_ELEMENT;
 
 #        printf " %d=%d %s:%s==%s\n", $stream->depth, scalar @parts, $stream->nodePath, $stream->name, join('/', @parts);
+        my $name = $self->ns eq 'strip' 
+            ? $stream->localName : $stream->name;
 
         if ($relative) {
-            if (_nameMatch($parts[0], $stream->name)) {
+            if (_nameMatch($parts[0], $name)) {
                 last;
             }
         } else {
-            if (!_nameMatch($parts[$stream->depth+1], $stream->name)) {
+            if (!_nameMatch($parts[$stream->depth+1], $name)) {
                 $stream->nextSibling();
             } elsif ($stream->depth == scalar @parts - 2) {
                 last;
@@ -128,7 +131,7 @@ sub readElement {
     my $self   = shift;
     my $stream = @_ ? shift : $self->stream;
 
-    my @element = ($stream->name);
+    my @element = ($self->ns eq 'strip' ? $stream->localName : $stream->name);
 
     if ($self->attributes) {
         my $attr = $self->readAttributes($stream);
@@ -154,7 +157,13 @@ sub readAttributes {
 
     my $attr = { };
     do {
-        $attr->{$stream->name} = $stream->value;
+        if ($self->ns eq 'strip') {
+            if ($stream->prefix and $stream->prefix ne 'xmlns') {
+                $attr->{$stream->localName} = $stream->value;
+            }
+        } else {
+            $attr->{$stream->name} = $stream->value;
+        }
     } while ($stream->moveToNextAttribute);
     $stream->moveToElement;
 
@@ -197,7 +206,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
@@ -284,6 +293,11 @@ node tests, C<//> only at the start...).  Namespaces are not supported yet.
 =item C<whitespace>
 
 Include ignorable whitespace as text elements (disabled by default)
+
+=item C<ns>
+
+Set to 'C<strip>' to strip XML namespaces (including attributes). Expanding
+namespace URIs ('C<expand'>) is not supported yet.
 
 =back
 
