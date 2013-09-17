@@ -1,6 +1,9 @@
 Changelog for XML-Struct
 
-0.11 2013-09-12T08:18:46
+0.12 2013-09-17T09:36:13
+ - Support '//' in pathes
+
+0.11 2013-09-12T08:17:16
  - new function removeXMLAttr
  - renamed 'hashify' to 'simple'
 

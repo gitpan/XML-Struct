@@ -6,7 +6,7 @@ build_requires: {}
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300037, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Dist::Zilla version 4.300038, CPAN::Meta::Converter version 2.131560'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -16,7 +16,7 @@ requires:
   Moo: 1.0
   XML::LibXML: 2.0
 resources:
-  bugtracker: https://github.com/nichtich/XML-Struct/issues
-  homepage: https://github.com/nichtich/XML-Struct
-  repository: https://github.com/nichtich/XML-Struct.git
-version: 0.11
+  bugtracker: https://github.com/nichtich/XML-Ordered/issues
+  homepage: https://github.com/nichtich/XML-Ordered
+  repository: https://github.com/nichtich/XML-Ordered.git
+version: 0.12

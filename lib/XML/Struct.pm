@@ -1,6 +1,6 @@
 package XML::Struct;
 # ABSTRACT: Represent XML as data structure preserving element order
-our $VERSION = '0.11'; # VERSION
+our $VERSION = '0.12'; # VERSION
 
 use strict;
 use XML::LibXML::Reader;
@@ -124,6 +124,7 @@ sub textValues {
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -132,7 +133,7 @@ XML::Struct - Represent XML as data structure preserving element order
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 
@@ -206,6 +207,20 @@ document given above woule be transformed to this structure:
             doz => {}
         }
     }
+
+=head1 MODULES
+
+=over
+
+=item L<XML::Struct::Reader>
+
+Read XML streams into XML data structures
+
+=item L<XML::Struct::Writer>
+
+Write XML data structures to XML streams
+
+=back
 
 =head1 FUNCTIONS
 
@@ -288,4 +303,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
