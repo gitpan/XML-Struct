@@ -1,6 +1,6 @@
 package XML::Struct::Writer;
 # ABSTRACT: Write XML data structures to XML streams
-our $VERSION = '0.13'; # VERSION
+our $VERSION = '0.14'; # VERSION
 
 use strict;
 use Moo;
@@ -98,7 +98,6 @@ sub writeEnd {
 1;
 
 __END__
-
 =pod
 
 =head1 NAME
@@ -107,7 +106,7 @@ XML::Struct::Writer - Write XML data structures to XML streams
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -283,3 +282,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+

@@ -1,6 +1,9 @@
 Changelog for XML-Struct
 
-0.13 2013-09-17T12:29:56
+0.14 2013-09-19T07:03:58
+ - fully enable option depth
+
+0.13 2013-09-17T12:17:43
  - new option 'depth' for simpleXML
  - support namespace stripping
 

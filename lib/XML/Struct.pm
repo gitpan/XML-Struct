@@ -1,6 +1,6 @@
 package XML::Struct;
 # ABSTRACT: Represent XML as data structure preserving element order
-our $VERSION = '0.13'; # VERSION
+our $VERSION = '0.14'; # VERSION
 
 use strict;
 use XML::LibXML::Reader;
@@ -18,7 +18,7 @@ sub readXML { # ( [$from], %options )
     my %reader_options = (
         map { $_ => delete $options{$_} }
         grep { exists $options{$_} }
-        qw(attributes whitespace path stream simple root ns)
+        qw(attributes whitespace path stream simple root ns depth)
     );
     if (%options) {
         if (exists $options{from} and keys %options == 1) {
@@ -134,7 +134,6 @@ sub textValues {
 1;
 
 __END__
-
 =pod
 
 =head1 NAME
@@ -143,7 +142,7 @@ XML::Struct - Represent XML as data structure preserving element order
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -263,16 +262,13 @@ passed.
 
 =item depth
 
-Only transform to a given depth (including the root, if option C<root> is
-enabled). This is useful for instance to access document-oriented XML embedded
-in data oriented XML. All elements below the given depth will be included
-unmodified as array elements.
+Only transform to a given depth. See L<XML::Struct::Reader> for documentation.
+
+All elements below the given depth are returned unmodified (not cloned) as
+array elements:
 
     $data = simpleXML($xml, depth => 2)
     $content = $data->{x}->{y}; # array or scalar (if existing)
-
-Use any negative or non-numeric value for unlimited depth. Depth zero (and
-depth one if with root) are only supported experimentally!
 
 =item attributes
 
@@ -326,3 +322,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
