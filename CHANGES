@@ -1,6 +1,12 @@
 Changelog for XML-Struct
 
-0.14 2013-09-19T07:03:58
+0.15 2013-09-23T10:30:40
+ - align empty XML elements with MicroXML data model
+ - new option: ns=>'disallow'
+ - fix namespace stripping attributes
+ - Document parallels to MicroXML
+
+0.14 2013-09-19T06:56:00
  - fully enable option depth
 
 0.13 2013-09-17T12:17:43

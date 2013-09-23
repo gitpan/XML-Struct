@@ -6,7 +6,7 @@ my ($data, $reader, $stream);
 
 $stream = XML::LibXML::Reader->new( string => "<root> </root>" );
 $reader = XML::Struct::Reader->new;
-is_deeply $reader->read( $stream ), [ 'root' ], 'skip whitespace';
+is_deeply $reader->read( $stream ), [ 'root', {}, [] ], 'skip whitespace';
 
 $stream = XML::LibXML::Reader->new( string => "<root> </root>" );
 $reader = XML::Struct::Reader->new( whitespace => 1 );
@@ -37,7 +37,7 @@ is_deeply $data, [
           'bar', { 'key' => 'value' },
           [
             "\n    text\n    ",
-            [ 'doz' ],
+            [ 'doz', {}, [] ],
             "xx"
           ]
         ]
@@ -45,10 +45,19 @@ is_deeply $data, [
     ], 'readXML';
 
 $data = readXML( $xml, ns => 'strip' );
-is_deeply $data->[1], { a => 'A' }, 'strip attribute namespaces';
+is_deeply $data->[1], { a => 'A', b => 'B' }, 'strip attribute namespaces';
 is_deeply $data->[2]->[0]->[0], 'foo', 'strip element namespaces';
 
-is_deeply readXML( 't/nested.xml', attributes => 0 ), 
+eval { readXML( $xml, ns => 'disallow' ) };
+like $@, qr{namespaces not allowed (at line \d+ )?at t/reader\.t}, 'disallow namespaces';
+
+$data = readXML( '<x xmlns="http://example.org/"/>', ns => 'strip' );
+is_deeply $data, ['x',{},[]], 'strip default namespace declaration';
+
+eval { readXML( '<x xmlns="http://example.org/"/>', ns => 'disallow' ) };
+like $@, qr{namespaces not allowed}, 'disallow namespaces attributes';
+
+is_deeply readXML( 't/nested.xml', attributes => 0, ns => 'disallow' ), 
     [ nested => [
       [ items => [ [ a => ["X"] ] ] ],
       [ "foo" => [ [ "bar" ] ] ],

@@ -1,10 +1,11 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.14'; # VERSION
+our $VERSION = '0.15'; # VERSION
 
 use strict;
 use Moo;
 use Carp qw(croak);
+our @CARP_NOT = qw(XML::Struct);
 use Scalar::Util qw(blessed);
 use XML::Struct;
 
@@ -13,7 +14,7 @@ has attributes => (is => 'rw', default => sub { 1 });
 has path       => (is => 'rw', default => sub { '*' }, isa => \&_checkPath);
 has stream     => (is => 'rw'); # TODO: check with isa
 has from       => (is => 'rw', trigger => 1);
-has ns         => (is => 'rw', default => sub { '' });
+has ns         => (is => 'rw', default => sub { 'keep' }, trigger => 1);
 has depth      => (is => 'rw');
 has simple     => (is => 'rw', default => sub { 0 });
 has root       => (is => 'rw', default => sub { 0 });
@@ -61,6 +62,17 @@ sub _trigger_from {
 }
 
 
+sub _trigger_ns {
+    my ($self, $ns) = @_;
+
+    if (!defined $ns or $ns eq '') {
+        $self->{ns} = 'keep';
+    } elsif ($ns !~ /^(keep|strip|disallow)?$/) {
+        croak "invalid option 'ns': $ns";
+    }
+}
+
+
 sub _checkPath {
     my $path = shift;
 
@@ -90,8 +102,8 @@ sub readNext { # TODO: use XML::LibXML::Reader->nextPatternMatch for more perfor
         next if $stream->nodeType != XML_READER_TYPE_ELEMENT;
 
 #        printf " %d=%d %s:%s==%s\n", $stream->depth, scalar @parts, $stream->nodePath, $stream->name, join('/', @parts);
-        my $name = ($self->ns and $self->ns eq 'strip') 
-            ? $stream->localName : $stream->name;
+
+        my $name = $self->_name($stream);
 
         if ($relative) {
             if (_nameMatch($parts[0], $name)) {
@@ -129,21 +141,31 @@ sub readDocument {
     return wantarray ? @document : $document[0];
 }
 
+sub _name {
+    my ($self, $stream) = @_;
+
+    if ($self->ns eq 'strip') {
+        return $stream->localName;
+    } elsif( $self->ns eq 'disallow' ) {
+        if ( $stream->name =~ /^xmlns(:.*)?$/) {
+            croak "namespaces not allowed at line ".$stream->lineNumber;
+        }
+    }
+
+    return $stream->name;
+}
+
 
 sub readElement {
     my $self   = shift;
     my $stream = @_ ? shift : $self->stream;
 
-    my @element = ($self->ns eq 'strip' ? $stream->localName : $stream->name);
+    my @element = ($self->_name($stream));
 
     if ($self->attributes) {
         my $attr = $self->readAttributes($stream);
-        my $children = $self->readContent($stream) if !$stream->isEmptyElement;
-        if ($children) {
-            push @element, $attr || { }, $children;
-        } elsif( $attr ) {
-            push @element, $attr;
-        }
+        my $children = $stream->isEmptyElement ? [ ] : $self->readContent($stream);
+        push @element, $attr, $children;
     } elsif( !$stream->isEmptyElement ) {
         push @element, $self->readContent($stream);
     }
@@ -156,16 +178,12 @@ sub readAttributes {
     my $self   = shift;
     my $stream = @_ ? shift : $self->stream;
 
-    return unless $stream->moveToFirstAttribute == 1;
+    return { } if $stream->moveToFirstAttribute != 1;
 
     my $attr = { };
     do {
-        if ($self->ns eq 'strip') {
-            if ($stream->prefix and $stream->prefix ne 'xmlns') {
-                $attr->{$stream->localName} = $stream->value;
-            }
-        } else {
-            $attr->{$stream->name} = $stream->value;
+        if ($self->ns ne 'strip' or $stream->name !~ /^xmlns(:.*)?$/) {
+            $attr->{ $self->_name($stream) } = $stream->value;
         }
     } while ($stream->moveToNextAttribute);
     $stream->moveToElement;
@@ -183,9 +201,7 @@ sub readContent {
         $stream->read;
         my $type = $stream->nodeType;
 
-        if (!$type or $type == XML_READER_TYPE_END_ELEMENT) {
-            return @children ? \@children : (); 
-        }
+        last if !$type or $type == XML_READER_TYPE_END_ELEMENT;
 
         if ($type == XML_READER_TYPE_ELEMENT) {
             push @children, $self->readElement($stream);
@@ -195,6 +211,8 @@ sub readContent {
             push @children, $stream->value;
         }
     }
+    
+    return \@children; 
 }
 
 1;
@@ -208,7 +226,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.14
+version 0.15
 
 =head1 SYNOPSIS
 
@@ -217,8 +235,8 @@ version 0.14
 
 =head1 DESCRIPTION
 
-This module reads from an XML stream via L<XML::LibXML::Reader> and return a
-Perl data structure with ordered XML (see L<XML::Struct>).
+This module reads an XML stream (via L<XML::LibXML::Reader>) into
+L<XML::Struct>/MicroXML data structures.
 
 =head1 METHODS
 
@@ -245,14 +263,14 @@ might happed.
 
 =head2 readAttributes( [ $stream ] )
 
-Read all XML attributes from a stream and return a hash reference or an empty
-list if no attributes were found.
+Read all XML attributes from a stream and return a (possibly empty) hash
+reference.
 
 =head2 readContent( [ $stream ] )
 
-Read all child elements of an XML element and return the result as array
-reference or as empty list if no children were found.  Significant whitespace
-is only included if option C<whitespace> is enabled.
+Read all child elements of an XML element and return the result as (possibly
+empty) array reference.  Significant whitespace is only included if option
+C<whitespace> is enabled.
 
 =encoding utf8
 
@@ -298,8 +316,40 @@ Include ignorable whitespace as text elements (disabled by default)
 
 =item C<ns>
 
-Set to 'C<strip>' to strip XML namespaces (including attributes). Expanding
-namespace URIs ('C<expand'>) is not supported yet.
+Define how XML namespaces should be processed. By default (value 'C<keep>'),
+this document:
+
+    <doc>
+      <x:foo xmlns:x="http://example.org/" bar="doz" />
+    </doc>
+
+is transformed to this structure, keeping namespace prefixes and declarations 
+as unprocessed element names and attributes:
+
+    [ 'doc', {}, [
+        [
+          'x:foo', {
+              'bar' => 'doz',
+              'xmlns:x' => 'http://example.org/'
+          }
+        ]
+    ]
+
+Setting this option to 'C<strip>' will remove all namespace prefixes and
+namespace declaration attributes, so the result would be:
+
+    [ 'doc', {}, [
+        [
+          'foo', {
+              'bar' => 'doz'
+          }
+        ]
+    ]
+
+Setting this option to 'C<disallow>' results in an error when namespace
+prefixes or declarations are read.
+
+Expanding namespace URIs ('C<expand'>) is not supported yet.
 
 =item C<simple>
 
