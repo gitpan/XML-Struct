@@ -1,6 +1,9 @@
 Changelog for XML-Struct
 
-0.15 2013-09-23T10:30:40
+0.16 2014-02-20T09:29:55
+ - fixed empty element bug in simpleXML
+
+0.15 2013-09-23T10:22:03
  - align empty XML elements with MicroXML data model
  - new option: ns=>'disallow'
  - fix namespace stripping attributes

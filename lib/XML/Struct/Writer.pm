@@ -1,6 +1,6 @@
 package XML::Struct::Writer;
 # ABSTRACT: Write XML data structures to XML streams
-our $VERSION = '0.15'; # VERSION
+our $VERSION = '0.16'; # VERSION
 
 use strict;
 use Moo;
@@ -98,7 +98,10 @@ sub writeEnd {
 1;
 
 __END__
+
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -106,7 +109,7 @@ XML::Struct::Writer - Write XML data structures to XML streams
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 SYNOPSIS
 
@@ -268,8 +271,6 @@ should be more performant for serialization. Examples of other modules that
 receive SAX events include L<XML::STX>, L<XML::SAX::SimpleDispatcher>, and
 L<XML::SAX::Machines>,
 
-=encoding utf8
-
 =head1 AUTHOR
 
 Jakob Voß
@@ -282,4 +283,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

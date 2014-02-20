@@ -1,6 +1,6 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.15'; # VERSION
+our $VERSION = '0.16'; # VERSION
 
 use strict;
 use Moo;
@@ -218,7 +218,10 @@ sub readContent {
 1;
 
 __END__
+
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -226,7 +229,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 SYNOPSIS
 
@@ -271,8 +274,6 @@ reference.
 Read all child elements of an XML element and return the result as (possibly
 empty) array reference.  Significant whitespace is only included if option
 C<whitespace> is enabled.
-
-=encoding utf8
 
 =head1 CONFIGURATION
 
@@ -383,4 +384,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

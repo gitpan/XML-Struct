@@ -1,6 +1,6 @@
 package XML::Struct;
 # ABSTRACT: Represent XML as data structure preserving element order
-our $VERSION = '0.15'; # VERSION
+our $VERSION = '0.16'; # VERSION
 
 use strict;
 use XML::LibXML::Reader;
@@ -73,7 +73,9 @@ sub _push_hash {
     my ($hash, $key, $value, $force) = @_;
 
     if ( exists $hash->{$key} ) {
-        $hash->{$key} = [ $hash->{$key} ] if !ref $hash->{$key};
+        if ((ref $hash->{$key} || '') ne 'ARRAY') {
+            $hash->{$key} = [ $hash->{$key} ];
+        }
         push @{$hash->{$key}}, $value;
     } elsif ( $force ) {
         $hash->{$key} = [ $value ];
@@ -134,7 +136,10 @@ sub textValues {
 1;
 
 __END__
+
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -142,7 +147,7 @@ XML::Struct - Represent XML as data structure preserving element order
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 SYNOPSIS
 
@@ -312,8 +317,6 @@ parts of XML Infoset in another data structure.
 
 See JSONx for a kind of reverse direction (JSON in XML).
 
-=encoding utf8
-
 =head1 AUTHOR
 
 Jakob Voß
@@ -326,4 +329,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
