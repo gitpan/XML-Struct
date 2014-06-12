@@ -1,6 +1,6 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.17'; # VERSION
+our $VERSION = '0.18'; # VERSION
 
 use strict;
 use Moo;
@@ -64,7 +64,6 @@ sub _trigger_from {
             $doc->setDocumentElement($from);
             $options{DOM} = $doc;
         } elsif( blessed $from ) {
-            print STDERR "BLESSED".ref($from)."\n";
             $options{IO} = $from;
         } elsif( !ref $from ) {
             $options{location} = $from; # filename or URL
@@ -246,7 +245,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.17
+version 0.18
 
 =head1 SYNOPSIS
 
