@@ -1,6 +1,10 @@
 Changelog for XML-Struct
 
-0.16 2014-02-20T09:29:55
+0.17 2014-06-12T12:09:04
+ - readXML from STDIN by default (close #9)
+ - support reading from XML::LibXML::Document/Element
+
+0.16 2014-02-20T09:25:51
  - fixed empty element bug in simpleXML
 
 0.15 2013-09-23T10:22:03

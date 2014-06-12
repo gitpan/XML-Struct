@@ -1,9 +1,10 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.16'; # VERSION
+our $VERSION = '0.17'; # VERSION
 
 use strict;
 use Moo;
+use Sub::Quote;
 use Carp qw(croak);
 our @CARP_NOT = qw(XML::Struct);
 use Scalar::Util qw(blessed);
@@ -12,7 +13,16 @@ use XML::Struct;
 has whitespace => (is => 'rw', default => sub { 0 });
 has attributes => (is => 'rw', default => sub { 1 });
 has path       => (is => 'rw', default => sub { '*' }, isa => \&_checkPath);
-has stream     => (is => 'rw'); # TODO: check with isa
+has stream     => (is => 'rw', 
+    lazy    => 1, 
+    builder => quote_sub(
+        "XML::LibXML::Reader->new( { IO => \*STDIN } )"
+    ),
+    isa     => quote_sub(q{
+        die 'stream must be an XML::LibXML::Reader'
+        unless blessed $_[0] && $_[0]->isa('XML::LibXML::Reader');
+    })
+);
 has from       => (is => 'rw', trigger => 1);
 has ns         => (is => 'rw', default => sub { 'keep' }, trigger => 1);
 has depth      => (is => 'rw');
@@ -47,7 +57,14 @@ sub _trigger_from {
             $options{string} = $$from;
         } elsif( ref $from and ref $from eq 'GLOB' ) {
             $options{FD} = $from;
+        } elsif( blessed $from and $from->isa('XML::LibXML::Document') ) {
+            $options{DOM} = $from;
+        } elsif( blessed $from and $from->isa('XML::LibXML::Element') ) {
+            my $doc = XML::LibXML->createDocument;
+            $doc->setDocumentElement($from);
+            $options{DOM} = $doc;
         } elsif( blessed $from ) {
+            print STDERR "BLESSED".ref($from)."\n";
             $options{IO} = $from;
         } elsif( !ref $from ) {
             $options{location} = $from; # filename or URL
@@ -229,7 +246,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 
@@ -282,7 +299,8 @@ C<whitespace> is enabled.
 =item C<from>
 
 A source to read from. Possible values include a string or string reference
-with XML data, a filename, an URL, a file handle, and a hash reference with
+with XML data, a filename, an URL, a file handle, instances of
+L<XML::LibXML::Document> or L<XML::LibXML::Element>, and a hash reference with
 options passed to L<XML::LibXML::Reader>.
 
 =item C<stream>
@@ -378,7 +396,7 @@ Jakob Voß
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Jakob Voß.
+This software is copyright (c) 2014 by Jakob Voß.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
