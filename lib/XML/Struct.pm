@@ -1,6 +1,6 @@
 package XML::Struct;
 # ABSTRACT: Represent XML as data structure preserving element order
-our $VERSION = '0.18'; # VERSION
+our $VERSION = '0.19'; # VERSION
 
 use strict;
 use XML::LibXML::Reader;
@@ -147,7 +147,7 @@ XML::Struct - Represent XML as data structure preserving element order
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 

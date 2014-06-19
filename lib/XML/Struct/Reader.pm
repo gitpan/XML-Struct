@@ -1,6 +1,6 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.18'; # VERSION
+our $VERSION = '0.19'; # VERSION
 
 use strict;
 use Moo;
@@ -18,10 +18,10 @@ has stream     => (is => 'rw',
     builder => quote_sub(
         "XML::LibXML::Reader->new( { IO => \*STDIN } )"
     ),
-    isa     => quote_sub(q{
+    isa     => sub {
         die 'stream must be an XML::LibXML::Reader'
         unless blessed $_[0] && $_[0]->isa('XML::LibXML::Reader');
-    })
+    }
 );
 has from       => (is => 'rw', trigger => 1);
 has ns         => (is => 'rw', default => sub { 'keep' }, trigger => 1);
@@ -245,7 +245,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 
