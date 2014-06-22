@@ -1,6 +1,9 @@
 Changelog for XML-Struct
 
-0.19 2014-06-19T07:20:41
+0.20 2014-06-22T10:40:49
+ - include XML serializer (issue #6)
+
+0.19 2014-06-19T07:20:35
  - avoid quote_sub failure
 
 0.18 2014-06-12T13:47:30
