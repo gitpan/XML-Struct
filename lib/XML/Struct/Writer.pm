@@ -1,6 +1,6 @@
 package XML::Struct::Writer;
 #ABSTRACT: Write XML data structures to XML streams
-our $VERSION = '0.20'; #VERSION
+our $VERSION = '0.21'; #VERSION
 
 use strict;
 use Moo;
@@ -11,8 +11,9 @@ use Scalar::Util qw(blessed reftype);
 has attributes => (is => 'rw', default => sub { 1 });
 has encoding   => (is => 'rw', default => sub { 'UTF-8' });
 has version    => (is => 'rw', default => sub { '1.0' });
+has standalone => (is => 'rw');
 has pretty     => (is => 'rw', default => sub { 0 }); # 0|1|2
-has xml_decl   => (is => 'rw', default => sub { 1 });
+has xmldecl    => (is => 'rw', default => sub { 1 });
 
 has to         => (
     is => 'rw',
@@ -102,9 +103,11 @@ sub writeCharacters {
 sub writeStart {
     my $self = shift;
     $self->handler->start_document;
-    if ($self->handler->can('xml_decl') && $self->xml_decl) {
+    if ($self->handler->can('xml_decl') && $self->xmldecl) {
         $self->handler->xml_decl({
-            Version => $self->version, Encoding => $self->encoding
+            Version => $self->version, 
+            Encoding => $self->encoding,
+            Standalone => $self->standalone,
         });
     }
     $self->writeStartElement($_[0]) if @_;
@@ -131,7 +134,7 @@ XML::Struct::Writer - Write XML data structures to XML streams
 
 =head1 VERSION
 
-version 0.20
+version 0.21
 
 =head1 SYNOPSIS
 
@@ -249,9 +252,13 @@ by default.
 
 Sets the XML version (C<1.0> by default).
 
-=item xml_decl
+=item xmldecl
 
 Include XML declaration on serialization. Enabled by default.
+
+=item standalone
+
+Add standalone flag in the XML declaration.
 
 =item to
 

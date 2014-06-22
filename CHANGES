@@ -1,6 +1,10 @@
 Changelog for XML-Struct
 
-0.20 2014-06-22T10:40:49
+0.21 2014-06-22T21:17:05
+ - fix pretty serialization w/o xmldecl
+ - add and test xmldecl
+
+0.20 2014-06-22T10:40:04
  - include XML serializer (issue #6)
 
 0.19 2014-06-19T07:20:35
