@@ -1,6 +1,6 @@
 package XML::Struct::Writer;
 #ABSTRACT: Write XML data structures to XML streams
-our $VERSION = '0.21'; #VERSION
+our $VERSION = '0.22'; #VERSION
 
 use strict;
 use Moo;
@@ -134,7 +134,7 @@ XML::Struct::Writer - Write XML data structures to XML streams
 
 =head1 VERSION
 
-version 0.21
+version 0.22
 
 =head1 SYNOPSIS
 

@@ -1,6 +1,13 @@
 Changelog for XML-Struct
 
-0.21 2014-06-22T21:17:05
+0.22 2014-06-24T12:23:18
+ - fixed issue #10
+ - Merge branch 'master' into issue-10
+ - merged feature branches
+ - refactored simpleXML to XML::Struct::Simple
+ - unit test for issue #10
+
+0.21 2014-06-22T21:13:53
  - fix pretty serialization w/o xmldecl
  - add and test xmldecl
 

@@ -1,10 +1,9 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.21'; # VERSION
+our $VERSION = '0.22'; # VERSION
 
 use strict;
 use Moo;
-use Sub::Quote;
 use Carp qw(croak);
 our @CARP_NOT = qw(XML::Struct);
 use Scalar::Util qw(blessed);
@@ -15,9 +14,9 @@ has attributes => (is => 'rw', default => sub { 1 });
 has path       => (is => 'rw', default => sub { '*' }, isa => \&_checkPath);
 has stream     => (is => 'rw', 
     lazy    => 1, 
-    builder => quote_sub(
-        "XML::LibXML::Reader->new( { IO => \*STDIN } )"
-    ),
+    builder => sub {
+        XML::LibXML::Reader->new( { IO => \*STDIN } )
+    },
     isa     => sub {
         die 'stream must be an XML::LibXML::Reader'
         unless blessed $_[0] && $_[0]->isa('XML::LibXML::Reader');
@@ -28,6 +27,7 @@ has ns         => (is => 'rw', default => sub { 'keep' }, trigger => 1);
 has depth      => (is => 'rw');
 has simple     => (is => 'rw', default => sub { 0 });
 has root       => (is => 'rw', default => sub { 0 });
+has content    => (is => 'rw', default => sub { 'content' });
 
 use XML::LibXML::Reader qw(
     XML_READER_TYPE_ELEMENT
@@ -71,7 +71,9 @@ sub _trigger_from {
             croak "invalid option 'from': $from";
         }
         
-        $from = XML::LibXML::Reader->new( %options );
+        $from = XML::LibXML::Reader->new( %options ) 
+            or die "failed to create XML::LibXML::Reader with "
+                . join(', ',map { "$_=".$options{$_} } keys %options )."\n";
     }
 
     $self->stream( $from );
@@ -135,12 +137,13 @@ sub readNext { # TODO: use XML::LibXML::Reader->nextPatternMatch for more perfor
     } 
 
     my $xml = $self->readElement($stream);
-    return $self->simple 
-        ? XML::Struct::simpleXML( $xml, 
-            root => $self->root, 
-            attributes => $self->attributes,
-            depth => $self->depth 
-        ) : $xml;
+
+    return $self->simple ? XML::Struct::Simple->new(
+            root        => $self->root, 
+            attributes  => $self->attributes,
+            depth       => $self->depth,
+            content     => $self->content, 
+        )->transform($xml) : $xml;
 }
 
 *read = \&readNext;
@@ -245,7 +248,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.21
+version 0.22
 
 =head1 SYNOPSIS
 
@@ -295,20 +298,20 @@ C<whitespace> is enabled.
 
 =over
 
-=item C<from>
+=item from
 
 A source to read from. Possible values include a string or string reference
 with XML data, a filename, an URL, a file handle, instances of
 L<XML::LibXML::Document> or L<XML::LibXML::Element>, and a hash reference with
 options passed to L<XML::LibXML::Reader>.
 
-=item C<stream>
+=item stream
 
 A L<XML::LibXML::Reader> to read from. If no stream has been defined, one must
 pass a stream parameter to the C<read...> methods. Setting a source with option
 C<from> automatically sets a stream.
 
-=item C<attributes>
+=item attributes
 
 Include attributes (enabled by default). If disabled, the representation of
 an XML element will be
@@ -319,7 +322,7 @@ instead of
 
    [ $name => \%attributes, \@children ]
 
-=item C<path>
+=item path
 
 Optional path expression to be used as default value when calling C<read>.
 Pathes must either be absolute (starting with "C</>") or consist of a single
@@ -328,11 +331,11 @@ element name. The special name "C<*>" matches all element names.
 A path is a very reduced form of an XPath expressions (no axes, no "C<..>", no
 node tests, C<//> only at the start...).  Namespaces are not supported yet.
 
-=item C<whitespace>
+=item whitespace
 
 Include ignorable whitespace as text elements (disabled by default)
 
-=item C<ns>
+=item ns
 
 Define how XML namespaces should be processed. By default (value 'C<keep>'),
 this document:
@@ -369,23 +372,31 @@ prefixes or declarations are read.
 
 Expanding namespace URIs ('C<expand'>) is not supported yet.
 
-=item C<simple>
+=item simple
 
 Convert XML to simple key-value structure as known from L<XML::Simple>.
 
-=item C<root>
+=item depth
 
-When using option 'C<simple>' the root element is removed by default. Use this
-option to keep the root or to further set its element name.
+Only transform to a given depth. All elements below the given depth are
+returned unmodified (not cloned) as ordered XML:
 
-=item C<depth>
+    $data = simpleXML($xml, depth => 2)
+    $content = $data->{x}->{y}; # array or scalar (if existing)
 
-When option 'C<simple>' is enabled, only transform to a given depth.  This
-option is useful for instance to access document-oriented XML embedded in data
-oriented XML. All elements below the given depth will be returned as ordered
-XML. Use any negative or non-numeric value for unlimited depth. The root
-element only counts as one level if option C<root> is enabled.  Depth zero (and
-depth one if with root) are only supported experimentally!
+This option is useful for instance to access document-oriented XML embedded in
+data oriented XML. 
+
+Use any negative or non-numeric value for unlimited depth. The root element
+only counts as one level if option C<root> is enabled.  Depth zero (and depth
+one if with root) are only supported experimentally!
+
+=item root
+
+=item content
+
+These options are only relevant when option C<simple> is true. See
+L<XML::Struct::Simple> for documentation.
 
 =back
 

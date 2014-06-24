@@ -1,6 +1,6 @@
 package XML::Struct::Writer::Stream;
 #ABSTRACT: Simplified SAX handler to serialize (Micro)XML documents
-our $VERSION = '0.21'; #VERSION
+our $VERSION = '0.22'; #VERSION
 
 use Moo;
 
@@ -135,7 +135,7 @@ XML::Struct::Writer::Stream - Simplified SAX handler to serialize (Micro)XML doc
 
 =head1 VERSION
 
-version 0.21
+version 0.22
 
 =head1 DESCRIPTION
 
