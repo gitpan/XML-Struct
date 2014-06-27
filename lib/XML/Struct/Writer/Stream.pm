@@ -1,11 +1,10 @@
 package XML::Struct::Writer::Stream;
-#ABSTRACT: Simplified SAX handler to serialize (Micro)XML documents
-our $VERSION = '0.22'; #VERSION
+our $VERSION = '0.23'; #VERSION
 
 use Moo;
 
-has fh     => (is => 'ro', default => sub { *STDOUT });
-has pretty => (is => 'ro');
+has fh     => (is => 'rw', default => sub { *STDOUT });
+has pretty => (is => 'rw');
 
 our %ESCAPE = (
     '&' => '&amp;',
@@ -79,7 +78,7 @@ sub end_element {
     my $tag = pop @{$self->{_stack}} or return;
 
     if ($self->{_status} == TAG_STARTED) {
-        print {$self->fh} ' />';
+        print {$self->fh} '/>';
     } elsif ($self->{_status} == CHAR_CONTENT) {
         print {$self->fh} $self->{_chars} . "</$tag>";
         $self->{_chars} = "";
@@ -116,10 +115,6 @@ sub end_document {
     print {$self->fh} "\n";
 }
 
-sub result {
-    1;
-}
-
 
 1;
 
@@ -131,11 +126,11 @@ __END__
 
 =head1 NAME
 
-XML::Struct::Writer::Stream - Simplified SAX handler to serialize (Micro)XML documents
+XML::Struct::Writer::Stream
 
 =head1 VERSION
 
-version 0.22
+version 0.23
 
 =head1 DESCRIPTION
 
@@ -145,6 +140,10 @@ MicroXML are not supported.
 
 The handler is written to reproduce the serialization of libxml as much as
 possible.
+
+=head1 NAME
+
+XML::Struct::Writer::Stream - simplified SAX handler to serialize (Micro)XML
 
 =head1 CONFIGURATION
 

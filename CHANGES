@@ -1,6 +1,10 @@
 Changelog for XML-Struct
 
-0.22 2014-06-24T12:23:18
+0.23 2014-06-27T22:00:46
+ - much more liberal XML writer
+ - make all members mutable
+
+0.22 2014-06-24T12:22:28
  - fixed issue #10
  - Merge branch 'master' into issue-10
  - merged feature branches

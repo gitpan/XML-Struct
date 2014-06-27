@@ -1,6 +1,6 @@
 package XML::Struct::Reader;
 # ABSTRACT: Read XML streams into XML data structures
-our $VERSION = '0.22'; # VERSION
+our $VERSION = '0.23'; # VERSION
 
 use strict;
 use Moo;
@@ -248,7 +248,7 @@ XML::Struct::Reader - Read XML streams into XML data structures
 
 =head1 VERSION
 
-version 0.22
+version 0.23
 
 =head1 SYNOPSIS
 

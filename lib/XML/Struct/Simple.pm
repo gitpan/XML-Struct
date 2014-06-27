@@ -1,6 +1,6 @@
 package XML::Struct::Simple;
 # ABSTRACT: Transform MicroXML data structures into simple (unordered) form
-our $VERSION = '0.22'; # VERSION
+our $VERSION = '0.23'; # VERSION
 
 use strict;
 use Moo;
@@ -112,7 +112,7 @@ XML::Struct::Simple - Transform MicroXML data structures into simple (unordered)
 
 =head1 VERSION
 
-version 0.22
+version 0.23
 
 =head1 SYNOPSIS
 

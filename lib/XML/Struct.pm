@@ -1,6 +1,6 @@
 package XML::Struct;
 # ABSTRACT: Represent XML as data structure preserving element order
-our $VERSION = '0.22'; # VERSION
+our $VERSION = '0.23'; # VERSION
 
 use strict;
 use XML::LibXML::Reader;
@@ -70,7 +70,7 @@ XML::Struct - Represent XML as data structure preserving element order
 
 =head1 VERSION
 
-version 0.22
+version 0.23
 
 =head1 SYNOPSIS
 
@@ -124,13 +124,13 @@ Parse XML as stream into XML data structures.
 Write XML data structures to XML streams for serializing, SAX processing, or
 creating a DOM object.
 
-=item L<XML::Struct::Simple>
-
-Transform XML data structure into simple form. 
-
 =item L<XML::Struct::Writer::Stream>
 
 Simplified SAX handler for XML serialization.
+
+=item L<XML::Struct::Simple>
+
+Transform XML data structure into simple form. 
 
 =back
 

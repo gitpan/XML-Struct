@@ -23,7 +23,7 @@ my %WriteMakefileArgs = (
     "Moo" => "1.0",
     "XML::LibXML" => "2.0"
   },
-  "VERSION" => "0.22",
+  "VERSION" => "0.23",
   "test" => {
     "TESTS" => "t/*.t"
   }
